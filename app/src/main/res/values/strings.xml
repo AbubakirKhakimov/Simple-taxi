@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Simple taxi</string>
+    <string name="foreground_service_notification_title">%1$s software is running in the background!</string>
+    <string name="foreground_service_notification_content">Please do not disable this notification for the app to work properly!</string>
+    <string name="tab_busy">Band</string>
+    <string name="tab_active">Faol</string>
+</resources>
