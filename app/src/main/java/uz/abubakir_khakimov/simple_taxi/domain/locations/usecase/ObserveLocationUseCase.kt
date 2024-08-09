@@ -10,5 +10,5 @@ class ObserveLocationUseCase @Inject constructor(
     private val locationsRepository: LocationsRepository
 ) {
 
-    fun invoke(): Result<Flow<Location>> = locationsRepository.observeLocation()
+    fun invoke(): Result<Flow<Location?>> = locationsRepository.observeLocation()
 }

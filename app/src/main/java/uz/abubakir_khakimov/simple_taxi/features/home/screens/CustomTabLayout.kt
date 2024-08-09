@@ -1,7 +1,9 @@
 package uz.abubakir_khakimov.simple_taxi.features.home.screens
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -43,7 +45,9 @@ fun WorkStateTab(modifier: Modifier = Modifier, tabSelected: (TabItem) -> Unit =
     var selectedTab by remember { mutableStateOf(value = TabItem.Busy) }
 
     val indicatorOffset by animateDpAsState(
-        targetValue = selectedTab.indicatorPositionDp, label = ""
+        targetValue = selectedTab.indicatorPositionDp,
+        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+        label = ""
     )
 
     Box(

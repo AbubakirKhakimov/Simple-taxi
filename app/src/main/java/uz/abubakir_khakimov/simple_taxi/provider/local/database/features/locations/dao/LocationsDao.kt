@@ -12,11 +12,7 @@ interface LocationsDao {
 
     @Query("SELECT * FROM locations_table WHERE time = " +
             "(SELECT MAX(time) FROM locations_table)")
-    fun observeLocation(): Flow<LocationLocalEntity>
-
-    @Query("SELECT * FROM locations_table WHERE time = " +
-            "(SELECT MAX(time) FROM locations_table)")
-    suspend fun getLastLocation(): LocationLocalEntity
+    fun observeLocation(): Flow<LocationLocalEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addLocation(location: LocationLocalEntity)

@@ -1,7 +1,11 @@
 <resources>
     <string name="app_name">Simple taxi</string>
-    <string name="foreground_service_notification_title">%1$s software is running in the background!</string>
-    <string name="foreground_service_notification_content">Please do not disable this notification for the app to work properly!</string>
+    <string name="foreground_service_notification_title">%1$s ilovasi fonda ishlayapti!</string>
+    <string name="foreground_service_notification_content">Iltimos, ilova to\'g\'ri ishlashi uchun ushbu bildirishnomani o\'chirmang!</string>
     <string name="tab_busy">Band</string>
     <string name="tab_active">Faol</string>
+    <string name="rate">Tarif</string>
+    <string name="orders">Buyurtmalar</string>
+    <string name="bordur">Bordur</string>
+    <string name="progress_text_template">%1$s / %2$s</string>
 </resources>

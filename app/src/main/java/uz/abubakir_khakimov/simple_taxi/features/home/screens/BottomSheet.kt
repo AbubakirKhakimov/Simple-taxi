@@ -1,6 +1,7 @@
 package uz.abubakir_khakimov.simple_taxi.features.home.screens
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import uz.abubakir_khakimov.simple_taxi.R
@@ -48,6 +52,34 @@ sealed class BottomSheetState(val position: Float) {
 
 fun Float.toBottomSheetDragging(): BottomSheetState =
     BottomSheetState.Dragging(position = this)
+
+sealed class BottomSheetItem(
+    @DrawableRes val iconRes: Int,
+    @StringRes val titleRes: Int,
+    val progressText: String? = null
+){
+    class Rate(
+        progressText: String
+    ): BottomSheetItem(
+        iconRes = R.drawable.ic_switch,
+        titleRes = R.string.rate,
+        progressText = progressText
+    )
+
+    class Orders(
+        progressText: String
+    ): BottomSheetItem(
+        iconRes = R.drawable.ic_order,
+        titleRes = R.string.orders,
+        progressText = progressText
+    )
+
+    class Bordur: BottomSheetItem(
+        iconRes = R.drawable.ic_rocket,
+        titleRes = R.string.bordur,
+        progressText = null
+    )
+}
 
 @Composable
 fun BottomSheet(
@@ -126,67 +158,66 @@ fun BottomSheetInnerCard(modifier: Modifier = Modifier) {
             containerColor = MaterialTheme.colorScheme.onSurface,
         )
     ) {
-        Column {
-            BottomSheetTab(
-                iconRes = R.drawable.ic_switch,
-                text = "Tarif",
-                progressText = "6 / 8"
-            )
+        val bottomSheetItems = listOf(
+            BottomSheetItem.Rate(
+                progressText = stringResource(
+                    id = R.string.progress_text_template, 6, 8
+                )
+            ),
+            BottomSheetItem.Orders(progressText = "0"),
+            BottomSheetItem.Bordur()
+        )
 
-            HorizontalDivider(modifier = Modifier.padding(start = 16.dp, end = 16.dp))
-
-            BottomSheetTab(
-                iconRes = R.drawable.ic_order,
-                text = "Buyurtmalar",
-                progressText = "0"
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(start = 16.dp, end = 16.dp))
-
-            BottomSheetTab(iconRes = R.drawable.ic_rocket, text = "Bordur")
+        LazyColumn(modifier = Modifier.fillMaxWidth(), userScrollEnabled = false) {
+            itemsIndexed(items = bottomSheetItems){ index, item ->
+                BottomSheetItem(bottomSheetItem = item, index = index)
+            }
         }
     }
 }
 
 @Composable
-fun BottomSheetTab(
+fun BottomSheetItem(
     modifier: Modifier = Modifier,
-    @DrawableRes iconRes: Int,
-    text: String,
-    progressText: String? = null,
-    onClick: () -> Unit = {}
+    bottomSheetItem: BottomSheetItem,
+    index: Int,
+    onClick: (bottomSheetItem: BottomSheetItem, index: Int) -> Unit = { _, _ -> }
 ) {
-    Row(
-        modifier = modifier
-            .clickable { onClick() }
-            .padding(all = 16.dp)
-    ) {
-        Icon(
-            painter = painterResource(id = iconRes),
-            tint = secondaryIconColor(),
-            contentDescription = ""
-        )
+    Column {
+        if (index != 0) HorizontalDivider(modifier = Modifier.padding(start = 16.dp, end = 16.dp))
 
-        Text(
-            text = text,
-            modifier = Modifier
-                .weight(weight = 1f)
-                .padding(start = 8.dp),
-            style = Typography.titleMedium,
-            color = primaryTextColor()
-        )
+        Row(
+            modifier = modifier
+                .clickable { onClick(bottomSheetItem, index) }
+                .padding(all = 16.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = bottomSheetItem.iconRes),
+                tint = secondaryIconColor(),
+                contentDescription = ""
+            )
 
-        if (progressText != null) Text(
-            text = progressText,
-            style = Typography.titleMedium,
-            color = secondaryTextColor()
-        )
+            Text(
+                text = stringResource(id = bottomSheetItem.titleRes),
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .padding(start = 8.dp),
+                style = Typography.titleMedium,
+                color = primaryTextColor()
+            )
 
-        Icon(
-            painter = painterResource(id = R.drawable.ic_right_chevron),
-            contentDescription = "",
-            modifier = Modifier.padding(start = 8.dp),
-            tint = secondaryIconColor()
-        )
+            if (bottomSheetItem.progressText != null) Text(
+                text = bottomSheetItem.progressText,
+                style = Typography.titleMedium,
+                color = secondaryTextColor()
+            )
+
+            Icon(
+                painter = painterResource(id = R.drawable.ic_right_chevron),
+                contentDescription = "",
+                modifier = Modifier.padding(start = 8.dp),
+                tint = secondaryIconColor()
+            )
+        }
     }
 }

@@ -6,9 +6,7 @@ import uz.abubakir_khakimov.simple_taxi.provider.local.database.features.locatio
 
 interface LocationsLocalDataSource {
 
-    fun observeLocation(): Result<Flow<LocationLocalEntity>>
-
-    suspend fun getLastLocation(): Result<LocationLocalEntity>
+    fun observeLocation(): Result<Flow<LocationLocalEntity?>>
 
     suspend fun addLocation(location: LocationLocalEntity)
 

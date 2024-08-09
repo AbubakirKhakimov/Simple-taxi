@@ -8,5 +8,6 @@ data class LocationLocalEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
     val latitude: Double,
     val longitude: Double,
+    val bearing: Float,
     val time: Long
 )

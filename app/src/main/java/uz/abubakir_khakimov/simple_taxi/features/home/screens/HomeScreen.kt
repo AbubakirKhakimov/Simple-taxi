@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -18,10 +17,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxExperimental
-import com.mapbox.maps.Style
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotationGroup
 import com.mapbox.maps.extension.compose.style.MapStyle
@@ -29,12 +28,19 @@ import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.addOnMoveListener
+import com.mapbox.maps.plugin.viewport.CompletionListener
 import uz.abubakir_khakimov.simple_taxi.R
+import uz.abubakir_khakimov.simple_taxi.core.presentation.extensions.autoTo
 import uz.abubakir_khakimov.simple_taxi.core.presentation.extensions.bitmapFromDrawableRes
 import uz.abubakir_khakimov.simple_taxi.core.presentation.extensions.mapRange
 import uz.abubakir_khakimov.simple_taxi.features.home.viewmodels.HomeViewModel
 
 enum class ZoomLevel(val level: Double) { Max(level = 22.0), Min(level = 0.0) }
+
+const val MAPBOX_LIGHT_STYLE_URL = "mapbox://styles/khakimov-dev/clzmuixqk006s01qxbesk81sa"
+const val MAPBOX_NIGHT_STYLE_URL = "mapbox://styles/khakimov-dev/clzmuvja1006j01pf2t1t6fki"
+
+const val AUTO_CAMERA_MOVE_DEF_ZOOM = 16.0
 
 @OptIn(MapboxExperimental::class)
 @Composable
@@ -44,44 +50,26 @@ fun HomeScreen(
 ){
     val context = LocalContext.current
     val homeState by viewModel.homeState.collectAsState()
-    var zoom by remember { mutableDoubleStateOf(value = 16.0) }
     var autoCameraMove by remember { mutableStateOf(value = true) }
     val taxiIconBitmap by remember {
         mutableStateOf(value = bitmapFromDrawableRes(context, resourceId = R.drawable.ic_car)!!)
     }
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            zoom(/* zoom = */ zoom)
+            zoom(/* zoom = */ AUTO_CAMERA_MOVE_DEF_ZOOM)
             center(
                 /* center = */ Point.fromLngLat(
                     /* longitude = */ homeState.location.longitude,
                     /* latitude = */ homeState.location.latitude
                 )
             )
-            pitch(/* pitch = */ 0.0)
-            bearing(/* bearing = */ 0.0)
         }
     }
 
     if (autoCameraMove) LaunchedEffect(key1 = homeState.location) {
-        mapViewportState.flyTo(
-            cameraOptions = cameraOptions {
-                center(
-                    /* center = */ Point.fromLngLat(
-                        /* longitude = */ homeState.location.longitude,
-                        /* latitude = */ homeState.location.latitude
-                    )
-                )
-                zoom(/* zoom = */ 16.0)
-            },
-            animationOptions = MapAnimationOptions.mapAnimationOptions { duration(duration = 800) }
-        )
-    }
-
-    LaunchedEffect(key1 = zoom) {
-        mapViewportState.flyTo(
-            cameraOptions = cameraOptions { zoom(/* zoom = */ zoom) },
-            animationOptions = MapAnimationOptions.mapAnimationOptions { duration(duration = 400) }
+        mapViewportState.changeCenterPointWithAnimation(
+            latitude = homeState.location.latitude,
+            longitude = homeState.location.longitude
         )
     }
 
@@ -91,7 +79,12 @@ fun HomeScreen(
             mapViewportState = mapViewportState,
             compass = {},
             scaleBar = {},
-            style = { MapStyle(style = if (isSystemInDarkTheme()) Style.DARK else Style.LIGHT) }
+            style = {
+                MapStyle(
+                    style = if (isSystemInDarkTheme()) MAPBOX_NIGHT_STYLE_URL
+                    else MAPBOX_LIGHT_STYLE_URL
+                )
+            }
         ){
             PointAnnotationGroup(
                 annotations = listOf(
@@ -103,6 +96,7 @@ fun HomeScreen(
                         )
                     )
                     .withIconImage(iconImageBitmap = taxiIconBitmap)
+                    .withIconRotate(iconRotate = homeState.location.bearing.toDouble())
                 )
             )
 
@@ -117,28 +111,54 @@ fun HomeScreen(
         }
 
         HighLevelItems(
-            modifier,
+            modifier = modifier,
             camZoomPlusOnClick = {
-                zoom += 1.0.coerceIn(
-                    minimumValue = ZoomLevel.Min.level,
-                    maximumValue = ZoomLevel.Max.level
+                mapViewportState.changeZoomWithAnimation(
+                    modifyZoom = { oldZoom -> oldZoom + 1.0 },
+                    completionListener = { autoCameraMove = false }
                 )
-                autoCameraMove = false
             },
             camZoomMinusOnClick = {
-                zoom -= 1.0.coerceIn(
-                    minimumValue = ZoomLevel.Min.level,
-                    maximumValue = ZoomLevel.Max.level
+                mapViewportState.changeZoomWithAnimation(
+                    modifyZoom = { oldZoom -> oldZoom - 1.0 },
+                    completionListener = { autoCameraMove = false }
                 )
-                autoCameraMove = false
             },
-            currentLocationOnClick = {
-                zoom = 16.0
-                autoCameraMove = true
-            }
+            currentLocationOnClick = { autoCameraMove = true }
         )
     }
 }
+
+@OptIn(MapboxExperimental::class)
+fun MapViewportState.changeZoomWithAnimation(
+    modifyZoom: (oldZoom: Double) -> Double,
+    completionListener: CompletionListener? = null
+) = easeTo(
+    cameraOptions = cameraOptions {
+        zoom(/* zoom = */ modifyZoom(cameraState?.zoom ?: AUTO_CAMERA_MOVE_DEF_ZOOM)
+            .coerceIn(minimumValue = ZoomLevel.Min.level, maximumValue = ZoomLevel.Max.level)
+        )
+    },
+    animationOptions = MapAnimationOptions.mapAnimationOptions { duration(duration = 400) },
+    completionListener = completionListener
+)
+
+@OptIn(MapboxExperimental::class)
+fun MapViewportState.changeCenterPointWithAnimation(
+    latitude: Double,
+    longitude: Double,
+    zoom: Double = AUTO_CAMERA_MOVE_DEF_ZOOM,
+    completionListener: CompletionListener? = null
+) = autoTo(
+    cameraOptions = cameraOptions {
+        center(
+            /* center = */ Point.fromLngLat(/* longitude = */ longitude, /* latitude = */ latitude)
+        )
+        zoom(/* zoom = */ zoom)
+    },
+    animationOptions = MapAnimationOptions.mapAnimationOptions { duration(duration = 800) },
+    completionListener = completionListener
+)
 
 @Composable
 fun HighLevelItems(

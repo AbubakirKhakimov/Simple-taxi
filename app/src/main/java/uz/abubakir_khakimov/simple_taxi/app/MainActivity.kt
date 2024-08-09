@@ -1,5 +1,6 @@
 package uz.abubakir_khakimov.simple_taxi.app
 
+import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -14,18 +15,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
 import uz.abubakir_khakimov.simple_taxi.app.theme.SimpleTaxiTheme
+import uz.abubakir_khakimov.simple_taxi.core.presentation.callback.PermissionManagerCallBack
 import uz.abubakir_khakimov.simple_taxi.core.presentation.extensions.isServiceRunning
+import uz.abubakir_khakimov.simple_taxi.core.presentation.managers.PermissionManager
 import uz.abubakir_khakimov.simple_taxi.features.home.screens.HomeScreen
 import uz.abubakir_khakimov.simple_taxi.features.home.services.LocationProviderService
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), PermissionManagerCallBack {
+
+    @Inject lateinit var permissionManager: PermissionManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        if (!isServiceRunning(serviceClass = LocationProviderService::class.java))
-            runLocationProviderService()
+        permissionManager.registerActivityResult(activity = this, callBack = this)
+
+        permissionManager.checkPermissions(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            autoAsk = true
+        )
 
         setContent {
             SimpleTaxiTheme {
@@ -34,6 +46,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onActivityResult(result: Map<String, Boolean>, tag: Any) {
+        if (result.containsValue(value = false)) return
+
+        if (!isServiceRunning(serviceClass = LocationProviderService::class.java))
+            runLocationProviderService()
     }
 
     private fun runLocationProviderService() = Intent(
@@ -45,8 +64,6 @@ class MainActivity : ComponentActivity() {
         else startService(/* service = */ intent)
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable

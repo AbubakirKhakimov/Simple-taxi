@@ -43,6 +43,7 @@ class LocationProviderService : Service(), LocationManagerCallBack {
                 id = 0,
                 latitude = newLocation.latitude,
                 longitude = newLocation.longitude,
+                bearing = newLocation.bearing,
                 time = System.currentTimeMillis()
             ).also { location -> addLocationUseCase.invoke(location = location) }
         }

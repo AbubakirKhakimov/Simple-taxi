@@ -17,14 +17,11 @@ class LocationsRepositoryImpl @Inject constructor(
     private val locationMapper: EntityMapper<Location, LocationLocalEntity>,
 ): LocationsRepository {
 
-    override fun observeLocation(): Result<Flow<Location>> =
+    override fun observeLocation(): Result<Flow<Location?>> =
         locationsLocalDataSource.observeLocation().map { locationsFlow ->
-            locationsFlow.map { location -> locationLocalMapper.mapTo(entity = location) }
-        }
-
-    override suspend fun getLastLocation(): Result<Location> =
-        locationsLocalDataSource.getLastLocation().let {
-            locationLocalMapper.mapToResult(entityResult = it)
+            locationsFlow.map { location ->
+                location?.let { locationLocalMapper.mapTo(entity = location) }
+            }
         }
 
     override suspend fun addLocation(location: Location) =

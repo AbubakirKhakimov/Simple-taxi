@@ -13,6 +13,7 @@ internal class LocationLocalMapper: EntityMapper<LocationLocalEntity, Location> 
             id = entity.id,
             latitude = entity.latitude,
             longitude = entity.longitude,
+            bearing = entity.bearing,
             time = entity.time
         )
 

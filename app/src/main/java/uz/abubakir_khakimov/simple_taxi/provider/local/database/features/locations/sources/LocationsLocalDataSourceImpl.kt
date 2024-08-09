@@ -14,17 +14,9 @@ class LocationsLocalDataSourceImpl @Inject constructor(
     private val locationsDao: LocationsDao
 ) : LocationsLocalDataSource {
 
-    override fun observeLocation(): Result<Flow<LocationLocalEntity>> =
+    override fun observeLocation(): Result<Flow<LocationLocalEntity?>> =
         try {
             val data = locationsDao.observeLocation()
-            Result.success(data)
-        } catch (t: Throwable) {
-            Result.error(t)
-        }
-
-    override suspend fun getLastLocation(): Result<LocationLocalEntity> =
-        try {
-            val data = locationsDao.getLastLocation()
             Result.success(data)
         } catch (t: Throwable) {
             Result.error(t)

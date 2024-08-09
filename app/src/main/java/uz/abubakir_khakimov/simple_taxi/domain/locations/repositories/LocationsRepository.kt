@@ -6,9 +6,7 @@ import uz.abubakir_khakimov.simple_taxi.domain.locations.models.Location
 
 interface LocationsRepository {
 
-    fun observeLocation(): Result<Flow<Location>>
-
-    suspend fun getLastLocation(): Result<Location>
+    fun observeLocation(): Result<Flow<Location?>>
 
     suspend fun addLocation(location: Location)
 

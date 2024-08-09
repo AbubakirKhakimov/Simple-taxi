@@ -67,10 +67,10 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout)
 
-    implementation (libs.androidx.dagger.hilt.navigation.compose)
-    implementation (libs.google.dagger.hilt.android)
+    implementation(libs.androidx.dagger.hilt.navigation.compose)
+    implementation(libs.google.dagger.hilt.android)
     implementation(libs.androidx.appcompat)
-    kapt (libs.google.dagger.hilt.compiler)
+    kapt(libs.google.dagger.hilt.compiler)
 
     implementation(libs.kotlinx.coroutines.android)
 

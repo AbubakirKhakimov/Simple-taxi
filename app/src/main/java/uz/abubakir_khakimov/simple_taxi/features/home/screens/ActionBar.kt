@@ -98,7 +98,6 @@ fun ActionBar(
                 Text(
                     "95",
                     style = Typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
                     color = LightPrimaryText,
                     textAlign = TextAlign.Center
                 )
