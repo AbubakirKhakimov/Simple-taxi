@@ -9,6 +9,7 @@ Simple Taxi App is a mobile application designed to provide a seamless taxi book
 - **Dark/Light Mode Support:** Adapts the map appearance based on the system's theme.
 - **Clean Architecture:** Ensures separation of concerns, making the app easy to maintain and extend.
 - **MVI Architecture:** Employs the MVI pattern for managing UI state predictably and efficiently.
+- **Local Database:** Uses Room for local data storage and management.
 
 ## Screenshots
 
@@ -60,5 +61,6 @@ The app follows the MVI pattern, which is ideal for managing complex UI states a
 - **Kotlin Coroutines**: For asynchronous programming.
 - **Hilt**: For dependency injection.
 - **Retrofit**: For network requests.
+- **Room**: For local data storage and management.
 
 
