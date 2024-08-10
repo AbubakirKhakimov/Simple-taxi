@@ -60,7 +60,6 @@ The app follows the MVI pattern, which is ideal for managing complex UI states a
 - **Jetpack Compose**: For building the user interface.
 - **Kotlin Coroutines**: For asynchronous programming.
 - **Hilt**: For dependency injection.
-- **Retrofit**: For network requests.
 - **Room**: For local data storage and management.
 
 
