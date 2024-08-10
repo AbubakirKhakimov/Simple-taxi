@@ -25,7 +25,7 @@ Simple Taxi App is a mobile application designed to provide a seamless taxi book
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/your_username/simple-taxi-app.git
+   git clone https://github.com/AbubakirKhakimov/Simple-taxi.git
    ```
 
 2. Open the project in Android Studio.
